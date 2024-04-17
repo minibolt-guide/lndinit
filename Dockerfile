@@ -1,4 +1,4 @@
-ARG GO_VERSION=1.18.3
+ARG GO_VERSION=1.22.2
 ARG BASE_IMAGE=lightninglabs/lnd
 ARG BASE_IMAGE_VERSION=v0.15.0-beta
 
@@ -11,15 +11,15 @@ ENV GODEBUG netdns=cgo
 # Pass a tag, branch or a commit using build-arg. This allows a docker image to
 # be built from a specified Git state. The default image will use the Git tip of
 # main by default.
-ARG checkout="main"
-ARG git_url="https://github.com/lightninglabs/lndinit"
+ARG checkout="migrate-db"
+ARG git_url="https://github.com/twofaktor/lndinit"
 
 # Install dependencies and build the binaries.
 RUN apk add --no-cache --update alpine-sdk \
   git \
   make \
-&&  git clone $git_url /go/src/github.com/lightninglabs/lndinit \
-&&  cd /go/src/github.com/lightninglabs/lndinit \
+&&  git clone $git_url /go/src/github.com/twofaktor/lndinit \
+&&  cd /go/src/github.com/twofaktor/lndinit \
 &&  git checkout $checkout \
 &&  make release-install
 
