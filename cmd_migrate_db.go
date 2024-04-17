@@ -178,10 +178,7 @@ func (x *migrateDBCommand) Execute(_ []string) error {
 			return err
 		}
 
-		// Check that the source DB has had all its schema migrations
-		// applied before we migrate any of its data. This only applies
-		// to the channel DB as that is the only DB that has migrations.
-		// Also make sure that the destination DB hasn't been marked as
+		// Make sure that the destination DB hasn't been marked as
 		// successfully having been the target of a migration. We only
 		// mark a destination DB as successfully migrated at the end of
 		// a successful and complete migration.
