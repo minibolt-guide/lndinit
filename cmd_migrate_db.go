@@ -181,13 +181,6 @@ func (x *migrateDBCommand) Execute(_ []string) error {
 		// Check that the source DB has had all its schema migrations
 		// applied before we migrate any of its data. This only applies
 		// to the channel DB as that is the only DB that has migrations.
-		log("Checking DB version of source DB")
-		if prefix == lncfg.NSChannelDB {
-			if err := checkMigrationsApplied(srcDb); err != nil {
-				return err
-			}
-		}
-
 		// Also make sure that the destination DB hasn't been marked as
 		// successfully having been the target of a migration. We only
 		// mark a destination DB as successfully migrated at the end of
@@ -447,6 +440,7 @@ func openDb(cfg *DB, prefix string) (walletdb.DB, error) {
 			},
 			prefix,
 		}
+		postgres.Init(5)
 		log("Opening postgres backend at %s with prefix '%s'",
 			cfg.Postgres.Dsn, prefix)
 
@@ -546,28 +540,6 @@ func addMarker(db walletdb.DB, markerKey []byte) error {
 	}
 
 	return rwtx.Commit()
-}
-
-func checkMigrationsApplied(db walletdb.DB) error {
-	var meta channeldb.Meta
-	err := kvdb.View(db, func(tx kvdb.RTx) error {
-		return channeldb.FetchMeta(&meta, tx)
-	}, func() {
-		meta = channeldb.Meta{}
-	})
-	if err != nil {
-		return err
-	}
-
-	if meta.DbVersionNumber != channeldb.LatestDBVersion() {
-		return fmt.Errorf("refusing to migrate source database with "+
-			"version %d while latest known DB version is %d; "+
-			"please upgrade the DB before using the data "+
-			"migration tool", meta.DbVersionNumber,
-			channeldb.LatestDBVersion())
-	}
-
-	return nil
 }
 
 // loggableKeyName returns a printable name of the given key.
